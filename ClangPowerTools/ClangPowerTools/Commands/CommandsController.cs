@@ -15,7 +15,7 @@ namespace ClangPowerTools
     private Dispatcher mDispatcher;
     private DTE2 mDte;
     //private ClangFormatPage mClangFormatPage;
-    private Package mPackage;
+    //private Package mPackage;
 
     #endregion
 

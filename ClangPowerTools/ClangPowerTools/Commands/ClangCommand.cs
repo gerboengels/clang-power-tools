@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ClangPowerTools.DialogPages;
 using ClangPowerTools.Script;
 using EnvDTE;
@@ -110,9 +111,9 @@ namespace ClangPowerTools
           mOutputManager.Show();
           mOutputManager.AddMessage($"\n{OutputWindowConstants.kDone} {aCommandName}\n");
         }
-        if (mOutputManager.HasErrors)
-          mErrorsManager.AddErrors(mOutputManager.Errors);
-
+        //if (mOutputManager.HasErrors)
+        //  mErrorsManager.AddErrors(mOutputManager.Errors);
+        Debug.Fail("Faild");
       }
       catch (Exception)
       {

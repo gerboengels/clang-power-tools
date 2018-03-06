@@ -96,9 +96,11 @@ namespace ClangPowerTools
         else if (!mMissingLlvm)
         {
           string messages = String.Join("\n", mMessagesBuffer);
-          if (mErrorParser.FindErrors(messages, out TaskError aError))
+          if (mErrorParser.FindErrors(messages, out TaskError aError, out string fullMessage))
           {
-            messages = mErrorParser.Format(messages, aError.FullMessage);
+            //messages = mErrorParser.Format(messages, aError.FullMessage);
+            messages = mErrorParser.Format(messages, fullMessage);
+
             AddMessage(messages);
             mMessagesBuffer.Clear();
             if (null != aError)

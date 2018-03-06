@@ -11,7 +11,6 @@ namespace ClangPowerTools
     #region Members
 
     protected string mParameters = string.Empty;
-    private bool mUseTidyFile;
 
     #endregion
 
