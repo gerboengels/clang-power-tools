@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualStudio.Shell;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace ClangPowerTools
 {
@@ -35,10 +34,10 @@ namespace ClangPowerTools
       string category = groups[7].Value;
 
       CategoryAndFullMessageBuilder(category, message, path, line, clangTidyChecker, 
-        out TaskErrorCategory errorCategory, out string fullMessage);
+        out EnvDTE.vsTaskPriority taskPriority, out string fullMessage);
 
       message = message.Insert(0, ErrorParserConstants.kClangTag);
-      aError = new TaskError(path, fullMessage, message, line, errorCategory);
+      aError = new TaskError(path, fullMessage, message, line, taskPriority);
 
       aFullMessage = fullMessage;
 
@@ -46,30 +45,27 @@ namespace ClangPowerTools
     }
 
     private void CategoryAndFullMessageBuilder(string aCategory, string aMessage, string aPath, 
-      int aLine, string aClangTidyChecker, out TaskErrorCategory aErrorCategory, out string aFullMessage)
+      int aLine, string aClangTidyChecker, out EnvDTE.vsTaskPriority aTaskPriority, out string aFullMessage)
     {
       aFullMessage = $"{aPath}({aLine}): ";
 
       switch (aCategory)
       {
         case ErrorParserConstants.kErrorTag:
-          aErrorCategory = TaskErrorCategory.Error;
+          aTaskPriority = EnvDTE.vsTaskPriority.vsTaskPriorityHigh;
           aFullMessage = $"{aFullMessage}{ErrorParserConstants.kErrorTag}";
           break;
         case ErrorParserConstants.kWarningTag:
-          aErrorCategory = TaskErrorCategory.Warning;
+          aTaskPriority = EnvDTE.vsTaskPriority.vsTaskPriorityMedium;
           aFullMessage = $"{aFullMessage}{ErrorParserConstants.kWarningTag}";
           break;
         default:
-          aErrorCategory = TaskErrorCategory.Message;
+          aTaskPriority = EnvDTE.vsTaskPriority.vsTaskPriorityLow;
           aFullMessage = $"{aFullMessage}{ErrorParserConstants.kMessageTag}";
           break;
       }
 
       aFullMessage = (true == string.IsNullOrWhiteSpace(aClangTidyChecker) ? $"{aFullMessage}:" : $"{aFullMessage} {aClangTidyChecker}:");
-
-      //aMessage = aMessage.Trim(' ');
-
       aFullMessage = $"{aFullMessage}{aMessage}";
     }
 

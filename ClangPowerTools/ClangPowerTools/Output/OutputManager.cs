@@ -98,13 +98,14 @@ namespace ClangPowerTools
           string messages = String.Join("\n", mMessagesBuffer);
           if (mErrorParser.FindErrors(messages, out TaskError aError, out string fullMessage))
           {
-            //messages = mErrorParser.Format(messages, aError.FullMessage);
-            messages = mErrorParser.Format(messages, fullMessage);
+            messages = mErrorParser.Format(messages, string.Empty);
+            var pane = mDte.ToolWindows.OutputWindow.ActivePane;
+
+            pane.OutputTaskItemString(aError.FullMessage + "\n", aError.Type, EnvDTE.vsTaskCategories.vsTaskCategoryBuildCompile, 
+              EnvDTE.vsTaskIcon.vsTaskIconCompile, aError.FilePath, aError.Line, aError.Message, true);
 
             AddMessage(messages);
             mMessagesBuffer.Clear();
-            if (null != aError)
-              mErrors.Add(aError);
           }
           else if (kBufferSize <= mMessagesBuffer.Count)
           {
@@ -115,9 +116,7 @@ namespace ClangPowerTools
       }
       catch (Exception)
       {
-
       }
-
     }
 
     public void OutputDataReceived(object sender, DataReceivedEventArgs e)

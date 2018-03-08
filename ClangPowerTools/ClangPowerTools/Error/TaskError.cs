@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.Shell;
-
-namespace ClangPowerTools
+﻿namespace ClangPowerTools
 {
   public class TaskError
   {
@@ -10,20 +8,20 @@ namespace ClangPowerTools
     public string FullMessage { get; set; }
     public string FilePath { get; set; }
     public int Line { get; set; }
-    public TaskErrorCategory Category { get; set; }
+    public EnvDTE.vsTaskPriority Type { get; set; }
 
     #endregion
 
     #region Constructor
 
     public TaskError(string aFilePath, string aFullMessage,
-      string aMessage, int aLine, TaskErrorCategory aCategory)
+      string aMessage, int aLine, EnvDTE.vsTaskPriority aType)
     {
       FilePath = aFilePath;
       FullMessage = aFullMessage;
       Message = aMessage;
       Line = aLine;
-      Category = aCategory;
+      Type = aType;
     }
 
     #endregion
