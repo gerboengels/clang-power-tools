@@ -81,8 +81,6 @@ namespace ClangPowerTools
     public void OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
     {
       VsBuildRunning = true;
-      ErrorsManager errorsManager = new ErrorsManager(mServiceProvider, mDte);
-      errorsManager.Clear();
     }
 
     public void OnBuildDone(vsBuildScope Scope, vsBuildAction Action)

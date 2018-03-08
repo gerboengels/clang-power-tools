@@ -96,7 +96,6 @@
     <Compile Include="DocumentsHandler.cs" />
     <Compile Include="Error\ErrorParser.cs" />
     <Compile Include="Error\ErrorParserConstants.cs" />
-    <Compile Include="Error\ErrorsManager.cs" />
     <Compile Include="Files Operations\FileChangerWatcher.cs" />
     <Compile Include="Files Operations\FileOpener.cs" />
     <Compile Include="Files Operations\FilePathCollector.cs" />
@@ -130,7 +129,6 @@
     </Compile>
     <Compile Include="Commands\TidyCommand.cs" />
     <Compile Include="ClangPowerToolsPackage.cs" />
-    <Compile Include="Error\ErrorWindow.cs" />
     <Compile Include="Script\ScriptBuiler.cs" />
     <Compile Include="Script\ScriptConstants.cs" />
     <Compile Include="Error\TaskError.cs" />

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using ClangPowerTools.DialogPages;
 using ClangPowerTools.Script;
 using EnvDTE;
@@ -22,7 +21,6 @@ namespace ClangPowerTools
     protected GeneralOptions mGeneralOptions;
     private Commands2 mCommand;
 
-    private ErrorsManager mErrorsManager;
     private PowerShellWrapper mPowerShell = new PowerShellWrapper();
     private ClangCompileTidyScript mCompileTidyScriptBuilder;
     private const string kVs15Version = "2017";
@@ -57,7 +55,6 @@ namespace ClangPowerTools
       if (null == mCommandsController)
         mCommandsController = aCommandsController;
 
-      mErrorsManager = new ErrorsManager(Package, DTEObj);
       mGeneralOptions = (GeneralOptions)Package.GetDialogPage(typeof(GeneralOptions));
     }
 
@@ -89,6 +86,7 @@ namespace ClangPowerTools
         mOutputManager = new OutputManager(DTEObj);
         InitPowerShell();
         ClearWindows();
+
         mOutputManager.AddMessage($"\n{OutputWindowConstants.kStart} {aCommandName}\n");
         foreach (var item in mItemsCollector.GetItems)
         {
@@ -111,9 +109,9 @@ namespace ClangPowerTools
           mOutputManager.Show();
           mOutputManager.AddMessage($"\n{OutputWindowConstants.kDone} {aCommandName}\n");
         }
-        //if (mOutputManager.HasErrors)
-        //  mErrorsManager.AddErrors(mOutputManager.Errors);
-        Debug.Fail("Faild");
+
+        mOutputManager.Show();
+
       }
       catch (Exception)
       {
@@ -163,7 +161,6 @@ namespace ClangPowerTools
 
     private void ClearWindows()
     {
-      mErrorsManager.Clear();
       mOutputManager.Clear();
       mOutputManager.Show();
     }
