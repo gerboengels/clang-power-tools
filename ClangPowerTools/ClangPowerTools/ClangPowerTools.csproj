@@ -94,6 +94,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="DocumentsHandler.cs" />
+    <Compile Include="Error\ErrorListHandler.cs" />
     <Compile Include="Error\ErrorParser.cs" />
     <Compile Include="Error\ErrorParserConstants.cs" />
     <Compile Include="Files Operations\FileChangerWatcher.cs" />

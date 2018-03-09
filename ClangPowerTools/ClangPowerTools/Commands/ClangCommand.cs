@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ClangPowerTools.DialogPages;
+using ClangPowerTools.Error;
 using ClangPowerTools.Script;
 using EnvDTE;
 using EnvDTE80;
@@ -110,7 +111,8 @@ namespace ClangPowerTools
           mOutputManager.AddMessage($"\n{OutputWindowConstants.kDone} {aCommandName}\n");
         }
 
-        mOutputManager.Show();
+        //if (0 != DTEObj.ToolWindows.ErrorList.ErrorItems.Count)
+        //  mErrorListHandler.Show();
 
       }
       catch (Exception)
@@ -161,6 +163,8 @@ namespace ClangPowerTools
 
     private void ClearWindows()
     {
+      //mErrorListHandler.Clear();
+
       mOutputManager.Clear();
       mOutputManager.Show();
     }

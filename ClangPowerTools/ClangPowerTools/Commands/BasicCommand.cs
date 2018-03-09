@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.Shell;
 using EnvDTE80;
 using EnvDTE;
 using System.Collections.Generic;
+using ClangPowerTools.Error;
 
 namespace ClangPowerTools
 {
@@ -10,6 +11,7 @@ namespace ClangPowerTools
   {
     #region Members
 
+    protected ErrorListHandler mErrorListHandler = null;
     private Dictionary<string, string> mVsVersions = new Dictionary<string, string>
     {
       {"11.0", "2010"},
@@ -38,10 +40,25 @@ namespace ClangPowerTools
       Package = aPackage ?? throw new ArgumentNullException("package");
       CommandSet = aGuid;
       Id = aId;
+
       DTEObj = (DTE2)ServiceProvider.GetService(typeof(DTE));
+      mErrorListHandler = new ErrorListHandler(ServiceProvider);
+
+      DTEObj.Events.BuildEvents.OnBuildBegin +=
+            new _dispBuildEvents_OnBuildBeginEventHandler(this.OnBuildBegin);
     }
 
     #endregion
+
+    #region Private Methods
+
+    private void OnBuildBegin(EnvDTE.vsBuildScope Scope, EnvDTE.vsBuildAction Action)
+    {
+     // mErrorListHandler.Clear();
+    }
+
+    #endregion
+
 
   }
 }
