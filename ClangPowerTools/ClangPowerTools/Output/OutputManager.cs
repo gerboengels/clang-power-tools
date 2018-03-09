@@ -102,13 +102,19 @@ namespace ClangPowerTools
             messages = mErrorParser.Format(messages, aError.FullMessage);
             var pane = mDte.ToolWindows.OutputWindow.ActivePane;
 
+            //string[] arrStr = mErrorParser.Split(messages, aError.FullMessage);
+
+
             // var pane2 = pane as IVsOutputWindowPane2;
 
             //pane.OutputTaskItemString(messages + "\n", aError.Type, EnvDTE.vsTaskCategories.vsTaskCategoryComment,
             //  EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
 
-            string beforErrorMessage = messages.Substring(0, messages.IndexOf(aError.FullMessage));
-            string afterErrorMessage = messages.Substring(messages.IndexOf(aError.FullMessage) + aError.FullMessage.Length);
+            string beforErrorMessage = StringExtensions.SubstringBefore(messages, aError.FullMessage);
+            string afterErrorMessage = StringExtensions.SubstringAfter(messages, aError.FullMessage);
+
+            //string beforErrorMessage = messages.Substring(0, messages.IndexOf(aError.FullMessage));
+            //string afterErrorMessage = messages.Substring(messages.IndexOf(aError.FullMessage) + aError.FullMessage.Length);
 
             pane.OutputTaskItemString(beforErrorMessage + "\n", aError.Type, EnvDTE.vsTaskCategories.vsTaskCategoryComment,
               EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
