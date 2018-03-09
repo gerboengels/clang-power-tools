@@ -1,4 +1,5 @@
 ﻿using EnvDTE80;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -98,13 +99,34 @@ namespace ClangPowerTools
           string messages = String.Join("\n", mMessagesBuffer);
           if (mErrorParser.FindErrors(messages, out TaskError aError, out string fullMessage))
           {
-            messages = mErrorParser.Format(messages, string.Empty);
+            messages = mErrorParser.Format(messages, aError.FullMessage);
             var pane = mDte.ToolWindows.OutputWindow.ActivePane;
 
-            pane.OutputTaskItemString(aError.FullMessage + "\n", aError.Type, EnvDTE.vsTaskCategories.vsTaskCategoryBuildCompile, 
+            // var pane2 = pane as IVsOutputWindowPane2;
+
+            //pane.OutputTaskItemString(messages + "\n", aError.Type, EnvDTE.vsTaskCategories.vsTaskCategoryComment,
+            //  EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
+
+            string beforErrorMessage = messages.Substring(0, messages.IndexOf(aError.FullMessage));
+            string afterErrorMessage = messages.Substring(messages.IndexOf(aError.FullMessage) + aError.FullMessage.Length);
+
+            pane.OutputTaskItemString(beforErrorMessage + "\n", aError.Type, EnvDTE.vsTaskCategories.vsTaskCategoryComment,
+              EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
+
+
+            pane.OutputTaskItemString(aError.FullMessage + "\n", aError.Type, EnvDTE.vsTaskCategories.vsTaskCategoryBuildCompile,
               EnvDTE.vsTaskIcon.vsTaskIconCompile, aError.FilePath, aError.Line, aError.Message, true);
 
-            AddMessage(messages);
+            pane.OutputTaskItemString(afterErrorMessage + "\n", aError.Type, EnvDTE.vsTaskCategories.vsTaskCategoryComment,
+           EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
+
+
+            pane.ForceItemsToTaskList();
+
+            //pane.OutputTaskItemStringEx(aError.FullMessage, VSTASKPRIORITY.TP_HIGH , VSTASKCATEGORY.CAT_BUILDCOMPILE, null, 
+            //  (int)_vstaskbitmap.BMP_COMPILE, aError.FilePath, (uint)aError.Line, 0, null, aError.Message, VSUSERCONTEXTATTRIBUTEUSAGE.VSUC_Usage_LookupF1.ToString());
+
+            //AddMessage(messages);
             mMessagesBuffer.Clear();
           }
           else if (kBufferSize <= mMessagesBuffer.Count)
@@ -114,8 +136,9 @@ namespace ClangPowerTools
           }
         }
       }
-      catch (Exception)
+      catch (Exception ex)
       {
+        
       }
     }
 
