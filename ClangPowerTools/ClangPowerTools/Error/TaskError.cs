@@ -1,29 +1,31 @@
-﻿using Microsoft.VisualStudio.Shell;
-
-namespace ClangPowerTools
+﻿namespace ClangPowerTools
 {
   public class TaskError
   {
     #region Properties
 
-    public string Message { get; set; }
-    public string FullMessage { get; set; }
     public string FilePath { get; set; }
+
     public int Line { get; set; }
-    public TaskErrorCategory Category { get; set; }
+
+    public EnvDTE.vsTaskPriority Category { get; set; }
+
+    public string FullMessage { get; set; }
+
+    public string Description { get; set; }
 
     #endregion
 
     #region Constructor
 
-    public TaskError(string aFilePath, string aFullMessage,
-      string aMessage, int aLine, TaskErrorCategory aCategory)
+    public TaskError(string aFilePath, int aLine, EnvDTE.vsTaskPriority aCategory,
+      string aFullMessage, string aDescription)
     {
       FilePath = aFilePath;
-      FullMessage = aFullMessage;
-      Message = aMessage;
       Line = aLine;
       Category = aCategory;
+      FullMessage = aFullMessage;
+      Description = aDescription;
     }
 
     #endregion
@@ -36,9 +38,7 @@ namespace ClangPowerTools
       if (null == otherObj)
         return false;
 
-      return Line == otherObj.Line &&
-        FilePath == otherObj.FilePath &&
-        FullMessage == otherObj.FullMessage;
+      return FullMessage == otherObj.FullMessage;
     }
 
     public override int GetHashCode()

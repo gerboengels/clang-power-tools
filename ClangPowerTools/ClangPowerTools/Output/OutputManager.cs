@@ -1,4 +1,5 @@
-﻿using EnvDTE80;
+﻿using EnvDTE;
+using EnvDTE80;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +14,7 @@ namespace ClangPowerTools
 
     private DTE2 mDte = null;
     private Dispatcher mDispatcher;
+    private OutputWindowPane mOutputWindowPane;
 
     private int kBufferSize = 5;
     private List<string> mMessagesBuffer = new List<string>();
@@ -20,7 +22,6 @@ namespace ClangPowerTools
     private ErrorParser mErrorParser = new ErrorParser();
 
     private bool mMissingLlvm = false;
-    private HashSet<TaskError> mErrors = new HashSet<TaskError>();
 
     private List<string> mPCHPaths = new List<string>();
 
@@ -28,15 +29,14 @@ namespace ClangPowerTools
 
     #region Properties
 
+    public bool ErrorsOccurred { get; set; }
+
     public bool MissingLlvm => mMissingLlvm;
 
     public List<string> Buffer => mMessagesBuffer;
 
     public bool EmptyBuffer => mMessagesBuffer.Count == 0;
 
-    public HashSet<TaskError> Errors => mErrors;
-
-    public bool HasErrors => 0 != mErrors.Count;
 
     public List<string> PCHPaths => mPCHPaths;
 
@@ -48,6 +48,9 @@ namespace ClangPowerTools
     {
       mDte = aDte;
       mDispatcher = HwndSource.FromHwnd((IntPtr)mDte.MainWindow.HWnd).RootVisual.Dispatcher;
+
+      //mOutputWindowPane = new OutputWindow(mDte).GetPane();
+
     }
 
     #endregion
@@ -89,6 +92,8 @@ namespace ClangPowerTools
     {
       try
       {
+        mOutputWindowPane = mDte.ToolWindows.OutputWindow.ActivePane;
+
         if (mErrorParser.LlvmIsMissing(aMessage))
         {
           mMissingLlvm = true;
@@ -96,17 +101,44 @@ namespace ClangPowerTools
         else if (!mMissingLlvm)
         {
           string messages = String.Join("\n", mMessagesBuffer);
-          if (mErrorParser.FindErrors(messages, out TaskError aError))
+          while (true == mErrorParser.FindErrors(messages, out TaskError aError))
           {
+            ErrorsOccurred = true;
+
             messages = mErrorParser.Format(messages, aError.FullMessage);
-            AddMessage(messages);
-            mMessagesBuffer.Clear();
-            if (null != aError)
-              mErrors.Add(aError);
+
+            string beforErrorMessage = StringExtension.SubstringBefore(messages, aError.FullMessage);
+            string afterErrorMessage = StringExtension.SubstringAfter(messages, aError.FullMessage);
+
+           // AddMessage(beforErrorMessage);
+
+            mDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+            {
+              mOutputWindowPane.OutputTaskItemString(beforErrorMessage, vsTaskPriority.vsTaskPriorityLow, null,
+               EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
+
+              mOutputWindowPane.OutputTaskItemString(aError.FullMessage + "\n", aError.Category, EnvDTE.vsTaskCategories.vsTaskCategoryBuildCompile,
+                EnvDTE.vsTaskIcon.vsTaskIconCompile, aError.FilePath, aError.Line, aError.Description, true);
+
+              mOutputWindowPane.ForceItemsToTaskList();
+
+            }));
+
+            if (0 != mMessagesBuffer.Count)
+              mMessagesBuffer.Clear();
+
+            messages = afterErrorMessage;
           }
-          else if (kBufferSize <= mMessagesBuffer.Count)
+
+          if (kBufferSize <= mMessagesBuffer.Count)
           {
-            AddMessage(mMessagesBuffer[0]);
+            mDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+            {
+              mOutputWindowPane.OutputTaskItemString(mMessagesBuffer[0], vsTaskPriority.vsTaskPriorityLow, EnvDTE.vsTaskCategories.vsTaskCategoryComment,
+               EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
+            }));
+
+            // AddMessage(mMessagesBuffer[0]);
             mMessagesBuffer.RemoveAt(0);
           }
         }
@@ -117,6 +149,11 @@ namespace ClangPowerTools
       }
 
     }
+
+    //public void SyncWithErrorList()
+    //{
+    //  mOutputWindowPane.ForceItemsToTaskList();
+    //}
 
     public void OutputDataReceived(object sender, DataReceivedEventArgs e)
     {

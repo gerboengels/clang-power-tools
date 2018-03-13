@@ -52,6 +52,8 @@ namespace ClangPowerTools
 
     #region Public Methods
 
+    public IVsOutputWindowPane GetPane() => mOutputPane;
+
     public override void Write(string aMessage) => mOutputPane.OutputString($"{aMessage}\n");
 
     public override void Write(char aCharacter) => mOutputPane.OutputString(aCharacter.ToString());
