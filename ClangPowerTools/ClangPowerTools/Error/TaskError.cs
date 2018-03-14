@@ -1,4 +1,6 @@
-﻿namespace ClangPowerTools
+﻿using Microsoft.VisualStudio.Shell.Interop;
+
+namespace ClangPowerTools
 {
   public class TaskError
   {
@@ -8,7 +10,9 @@
 
     public int Line { get; set; }
 
-    public EnvDTE.vsTaskPriority Category { get; set; }
+    public VSTASKPRIORITY Category { get; set; }
+
+    public _vstaskbitmap BitMap { get; set; }
 
     public string FullMessage { get; set; }
 
@@ -18,16 +22,17 @@
 
     #region Constructor
 
-    public TaskError(string aFilePath, int aLine, EnvDTE.vsTaskPriority aCategory,
-      string aFullMessage, string aDescription)
+    public TaskError(string aFilePath, int aLine, VSTASKPRIORITY aCategory,
+      _vstaskbitmap aBitMap, string aFullMessage, string aDescription)
     {
       FilePath = aFilePath;
       Line = aLine;
       Category = aCategory;
+      BitMap = aBitMap;
       FullMessage = aFullMessage;
       Description = aDescription;
     }
-
+    
     #endregion
 
     #region Public Methods

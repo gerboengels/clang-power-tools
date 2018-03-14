@@ -1,5 +1,5 @@
-﻿using EnvDTE;
-using EnvDTE80;
+﻿using EnvDTE80;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +14,7 @@ namespace ClangPowerTools
 
     private DTE2 mDte = null;
     private Dispatcher mDispatcher;
-    private OutputWindowPane mOutputWindowPane;
+    private IVsOutputWindowPane mOutputWindowPane;
 
     private int kBufferSize = 5;
     private List<string> mMessagesBuffer = new List<string>();
@@ -49,8 +49,7 @@ namespace ClangPowerTools
       mDte = aDte;
       mDispatcher = HwndSource.FromHwnd((IntPtr)mDte.MainWindow.HWnd).RootVisual.Dispatcher;
 
-      //mOutputWindowPane = new OutputWindow(mDte).GetPane();
-
+      mOutputWindowPane = new OutputWindow(mDte).GetPane();
     }
 
     #endregion
@@ -92,7 +91,6 @@ namespace ClangPowerTools
     {
       try
       {
-        mOutputWindowPane = mDte.ToolWindows.OutputWindow.ActivePane;
 
         if (mErrorParser.LlvmIsMissing(aMessage))
         {
@@ -110,19 +108,12 @@ namespace ClangPowerTools
             string beforErrorMessage = StringExtension.SubstringBefore(messages, aError.FullMessage);
             string afterErrorMessage = StringExtension.SubstringAfter(messages, aError.FullMessage);
 
-           // AddMessage(beforErrorMessage);
+            mOutputWindowPane.OutputStringThreadSafe(beforErrorMessage + "\n");
 
-            mDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
-            {
-              mOutputWindowPane.OutputTaskItemString(beforErrorMessage, vsTaskPriority.vsTaskPriorityLow, null,
-               EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
+            uint line = 0 < (uint)aError.Line ? (uint)aError.Line - 1 : 0;
 
-              mOutputWindowPane.OutputTaskItemString(aError.FullMessage + "\n", aError.Category, EnvDTE.vsTaskCategories.vsTaskCategoryBuildCompile,
-                EnvDTE.vsTaskIcon.vsTaskIconCompile, aError.FilePath, aError.Line, aError.Description, true);
-
-              mOutputWindowPane.ForceItemsToTaskList();
-
-            }));
+            var errorCode = mOutputWindowPane.OutputTaskItemString(aError.FullMessage + "\n", aError.Category,
+              VSTASKCATEGORY.CAT_BUILDCOMPILE, string.Empty, (int)aError.BitMap, aError.FilePath, line, aError.Description);
 
             if (0 != mMessagesBuffer.Count)
               mMessagesBuffer.Clear();
@@ -132,16 +123,11 @@ namespace ClangPowerTools
 
           if (kBufferSize <= mMessagesBuffer.Count)
           {
-            mDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
-            {
-              mOutputWindowPane.OutputTaskItemString(mMessagesBuffer[0], vsTaskPriority.vsTaskPriorityLow, EnvDTE.vsTaskCategories.vsTaskCategoryComment,
-               EnvDTE.vsTaskIcon.vsTaskIconComment, null, 0, null, false);
-            }));
-
-            // AddMessage(mMessagesBuffer[0]);
+            mOutputWindowPane.OutputStringThreadSafe(mMessagesBuffer[0] + "\n");
             mMessagesBuffer.RemoveAt(0);
           }
         }
+
       }
       catch (Exception)
       {
@@ -150,25 +136,35 @@ namespace ClangPowerTools
 
     }
 
-    //public void SyncWithErrorList()
-    //{
-    //  mOutputWindowPane.ForceItemsToTaskList();
-    //}
+    public void SyncWithErrorList()
+    {
+      mDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+      {
+        mOutputWindowPane.FlushToTaskList();
+      }));
+    }
 
     public void OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
-      if (null == e.Data)
-        return;
-      mMessagesBuffer.Add(e.Data);
-      ProcessOutput(e.Data);
+      mDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+      {
+        if (null == e.Data)
+          return;
+        mMessagesBuffer.Add(e.Data);
+        ProcessOutput(e.Data);
+
+      }));
     }
 
     public void OutputDataErrorReceived(object sender, DataReceivedEventArgs e)
     {
-      if (null == e.Data)
-        return;
-      mMessagesBuffer.Add(e.Data);
-      ProcessOutput(e.Data);
+      mDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+      {
+        if (null == e.Data)
+          return;
+        mMessagesBuffer.Add(e.Data);
+        ProcessOutput(e.Data);
+      }));
     }
 
     #endregion

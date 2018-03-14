@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.Shell.Interop;
 using System.Text.RegularExpressions;
 
 namespace ClangPowerTools
@@ -32,34 +32,40 @@ namespace ClangPowerTools
       int.TryParse(groups[3].Value, out int line);
 
       string categoryAsString = groups[7].Value;
-      EnvDTE.vsTaskPriority category = FindErrorCategory(ref categoryAsString);
+      _vstaskbitmap bitMap = 0;
+      VSTASKPRIORITY category = FindErrorCategory(ref categoryAsString, ref bitMap);
 
       string clangTidyChecker = groups[10].Value;
       string fullMessage = ConstructFullErrorMessage(path, line, categoryAsString, clangTidyChecker, messageDescription);
 
       messageDescription = messageDescription.Insert(0, ErrorParserConstants.kClangTag);
-      aError = new TaskError(path, line, category, fullMessage, messageDescription);
+      aError = new TaskError(path, line, category, bitMap, fullMessage, messageDescription);
 
       return true;
     }
 
-    private EnvDTE.vsTaskPriority FindErrorCategory(ref string aCategoryAsString)
+    private VSTASKPRIORITY FindErrorCategory(ref string aCategoryAsString, ref _vstaskbitmap aBitMap)
     {
-      EnvDTE.vsTaskPriority category;
+      VSTASKPRIORITY category;
 
       switch (aCategoryAsString)
       {
         case ErrorParserConstants.kErrorTag:
-          category = EnvDTE.vsTaskPriority.vsTaskPriorityHigh;
+          category = VSTASKPRIORITY.TP_HIGH;
           aCategoryAsString = ErrorParserConstants.kErrorTag;
+          aBitMap = _vstaskbitmap.BMP_COMPILE;
           break;
+
         case ErrorParserConstants.kWarningTag:
-          category = EnvDTE.vsTaskPriority.vsTaskPriorityMedium;
+          category = VSTASKPRIORITY.TP_NORMAL;
           aCategoryAsString = ErrorParserConstants.kWarningTag;
+          aBitMap = _vstaskbitmap.BMP_SQUIGGLE;
           break;
+
         default:
-          category = EnvDTE.vsTaskPriority.vsTaskPriorityLow;
+          category = VSTASKPRIORITY.TP_LOW;
           aCategoryAsString = ErrorParserConstants.kMessageTag;
+          aBitMap = _vstaskbitmap.BMP_COMMENT;
           break;
       }
       return category;

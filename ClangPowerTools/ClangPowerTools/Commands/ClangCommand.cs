@@ -5,7 +5,6 @@ using ClangPowerTools.Script;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
-using ClangPowerTools.Error;
 
 namespace ClangPowerTools
 {
@@ -22,7 +21,6 @@ namespace ClangPowerTools
     protected GeneralOptions mGeneralOptions;
     private Commands2 mCommand;
 
-    //private ErrorsManager mErrorsManager;
     private PowerShellWrapper mPowerShell = new PowerShellWrapper();
     private ClangCompileTidyScript mCompileTidyScriptBuilder;
     private const string kVs15Version = "2017";
@@ -57,7 +55,6 @@ namespace ClangPowerTools
       if (null == mCommandsController)
         mCommandsController = aCommandsController;
 
-      //mErrorsManager = new ErrorsManager(Package, DTEObj);
       mGeneralOptions = (GeneralOptions)Package.GetDialogPage(typeof(GeneralOptions));
     }
 
@@ -116,13 +113,9 @@ namespace ClangPowerTools
 
         if (true == mOutputManager.ErrorsOccurred)
         {
-          //mOutputManager.SyncWithErrorList();
+          mOutputManager.SyncWithErrorList();
           mErrorListHandler.Show();
         }
-
-        //DTEObj.ToolWindows.ErrorList.ShowErrors = true;
-        //DTEObj.ToolWindows.ErrorList.ShowWarnings = true;
-        //DTEObj.ToolWindows.ErrorList.ShowMessages = true;
 
       }
       catch (Exception)

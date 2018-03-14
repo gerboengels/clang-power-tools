@@ -31,11 +31,8 @@ namespace ClangPowerTools.Error
 
     public void Clear()
     {
-     // mErrorListProvider.Tasks.Clear();
-      //mErrorListProvider.Refresh();
-
-      //for (int i = 0; i < mErrorListProvider.Tasks.Count; ++i)
-      //  mErrorListProvider.Tasks.RemoveAt(i);
+      mErrorListProvider.Tasks.Clear();
+      mErrorListProvider.Refresh();
     }
 
     #endregion
